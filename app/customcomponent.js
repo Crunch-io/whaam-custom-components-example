@@ -53,4 +53,21 @@
             alias : 'defaultDatasetView'
         })
     }])
+
+    myCustomComponent.config(['navigationTabsProvider', function(navBar) {
+        navBar.addNavigationRoute({
+            name : 'app.root',
+            tooltip : 'Select a dataset to analyze',
+            display : 'datasets',
+            shortName : 'datasets'
+        })
+
+        navBar.addNavigationRoute({
+            name : 'app.datasets.datasetInfo',
+            requiresDataset : true,
+            display : 'info',
+            tooltip : 'See opened dataset information',
+            shortName : 'info'
+        })
+    }])
 })()
