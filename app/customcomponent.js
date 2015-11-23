@@ -11,7 +11,7 @@
 
         return {
             restrict : 'E',
-            template : '<div>{{dataset.name}}</div>'
+            template : '<div>{{dataset.name}}</div>',
             link : function(scope) {
                 currentDataset.fetch().then(function(dataset) {
                     scope.dataset = dataset
@@ -25,7 +25,5 @@
     ]
 
     //You can use all the services and directives already defined by whaam
-    displayDatasetMod.directive()
-
-])
+    displayDatasetMod.directive('displayDatasetInfo', DisplayDatasetInfoDirective)
 })()
