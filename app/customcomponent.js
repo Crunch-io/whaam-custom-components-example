@@ -28,30 +28,28 @@
     displayDatasetMod.directive('displayDatasetInfo', DisplayDatasetInfoDirective)
 
     function SimpleAnalysisController($scope,
-        currentDataset,
         cachedHierarchicalVariables,
         Analysis,
         xtabFactory,
-        displaySettings) {
+        displaySettings,
+        filterBar) {
 
         this.init = function() {
-            currentDataset.fetch().then(function(dataset) {
-                cachedHierarchicalVariables
-                    .waitForCachePopulation()
-                    .then(function(hv) {
-                        createAnalysis(dataset, hv)
-                    })
-            })
+            cachedHierarchicalVariables
+                .waitForCachePopulation()
+                .then(createAnalysis)
+
+            $scope.$on('filter.applied', createAnalysis)
+            $scope.$on('filter.removed', createAnalysis)
         }
 
-        function createAnalysis(dataset, variables) {
-            var x = variables.byName('x'),
+        function createAnalysis() {
+            var variables = cachedHierarchicalVariables.current,
+                x = variables.byName('x'),
                 y = variables.byName('y')
                 ;
 
-            $scope.analysis = Analysis.create({
-                datasetId : dataset.self
-            })
+            $scope.analysis = Analysis.create()
 
             console.log($scope.analysis.state) //Displays empty
 
@@ -64,7 +62,18 @@
         }
 
         function createDisplayTable() {
+            var filter = filterBar.eligibleFilters[0].self
+                ;
+
             console.log('analysis generated', $scope.analysis.state)
+
+            // if(!$scope.analysis.unfiltered) {
+            //     $scope.analysis.handle('set-unfiltered')
+            // }
+
+            if(!$scope.analysis.hasCustomFilters) {
+                $scope.analysis.handle('add-filter', filter)
+            }
 
             xtabFactory.getXtab({
                 analysis : $scope.analysis,
@@ -79,11 +88,11 @@
 
     SimpleAnalysisController.$inject = [
         '$scope',
-        'currentDataset',
         'cachedHierarchicalVariables',
         'Analysis',
         'xtabFactory',
-        'displaySettings'
+        'displaySettings',
+        'filterBar'
     ]
 
     displayDatasetMod.controller('simpleAnalysisCtrl', SimpleAnalysisController)
@@ -101,6 +110,9 @@
         $stateProvider.state('app.datasets.simpleAnalysis', {
             url : '/simple-analysis'
             , views : {
+                'toolbar@app' : {
+                    templateUrl : '/dataset-header/dataset-header.html'
+                },
                 content : {
                     template : `
                         <div class="analyze" ng-controller="simpleAnalysisCtrl">
